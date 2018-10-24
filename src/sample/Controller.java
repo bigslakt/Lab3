@@ -21,59 +21,57 @@ import java.util.Stack;
 
 public class Controller {
 
-    ArrayList<Shape> shapes = new ArrayList<>();  //listan som lagrar shapes
-    ShapeFactory shapeFactory = new ShapeFactory();  //Shape Factory används för att avgöra vilken shape som ska byggas
-    Command command;  //Command används för att spara undo/redo kommandon i commandstack
+    private ArrayList<Shape> shapes = new ArrayList<>();  //The list thats storing shapes
+    private ShapeFactory shapeFactory = new ShapeFactory();  //ShapeFactory is used to decide which shape type to create
+    private Command command;  //Command is used to implement undo/redo (command pattern)
 
-    private int undoRedoPointer = -1;  //Håller reda på hur många kommandon som lagrats i stacken och deras positioner
-    private Stack<Command> commandStack = new Stack<>();  //Stacken lagrar kommandon
+    private int undoRedoPointer = -1;  //Keeps track on the elements in the CommandStack
+    private Stack<Command> commandStack = new Stack<>();  //commandStack stores executed commands
 
     @FXML
-    private Canvas canvas;  //Canvasen som shapse målas på
+    private Canvas canvas;  //The Canvas that shapes are drawn onto
     @FXML
-    private ColorPicker colorPicker;  //Colorpickern är färg-vals menyn
+    private ColorPicker colorPicker;  //The colorPicker is the color menu
     @FXML
-    private TextField textField;  //Textfältet där storlek för en shape skrivs in
+    private TextField textField;  //The textField is where the user write the wanted size on a shape
 
-    double canvasWidth;
-    double canvasHeight;
-    private ToggleButton shapeButton;  //Variabel för toggle buttons
-    private Shape shape;  //Färdig shape klar för placering på canvasen
-    private Shape selectedShape;  //Selected shape efter högerklick
-    private String shapeType;  //Shapetype lagrar vald shape efter användaren valt en shape i fönstret
-    private Color color;  //Vald färg
-    private double size;  //Inställd storlek
-    private double x;  //Position i x led
-    private double y;  //Position i Y led
-    private GraphicsContext g;  //grafiken för canvasen
+    private double canvasWidth;  //The canvas´s width and height
+    private double canvasHeight;
+    private ToggleButton shapeButton;  //shapeButton is the toggleButtons that is used for deciding shape to create
+    private Shape shape;  //Created shape ready for placing on canvas
+    private Shape selectedShape;  //selectedShape is selected with the right mouse key
+    private String shapeType;  //shapeType stores an String of the shape type the user have chosen to create
+    private Color color;  //color is the picked color
+    private double size;  //size is the size that the user have decided
+    private GraphicsContext g;  //The graphic for the canvas
 
-    //Denna metoden körs vid start och ligger i bakgrunden
+    //The method initialize starts when the program starts
     public void initialize()
     {
-        canvasWidth = canvas.getWidth();
+        canvasWidth = canvas.getWidth();  //The canvas gets its width and height
         canvasHeight = canvas.getHeight();
 
-        g = canvas.getGraphicsContext2D();
+        g = canvas.getGraphicsContext2D();  //The graphic for the canvas
 
-        g.clearRect(0, 0, canvasWidth, canvasHeight);
+        g.clearRect(0, 0, canvasWidth, canvasHeight);  //Settings for the canvas
         g.setFill(Color.WHITE);
         g.fillRect(0, 0, 600, 400);
 
-        //Listener för textfältet när man ändrar storlek
+        //Listener for the textField for changing size
         textField.textProperty().addListener(new ChangeListener<String>() {
             @Override
             public void changed(ObservableValue<? extends String> observable,
                                 String oldValue, String newValue) {
 
-                if(selectedShape != null && !newValue.equals(""))
+                if(selectedShape != null && !newValue.equals(""))  //If a shape is selected and the textfield is not empty
                 {
-                    changeSize(newValue);
+                    changeSize(newValue);  //The method changeSize is called
                 }
             }
         });
     }
 
-    //Event för när man valt en shape i fönstret
+    //ActionEvent for clicking shapeButtons
     public void shapeClick(ActionEvent actionEvent) {
 
         selectedShape = null;
@@ -81,110 +79,108 @@ public class Controller {
         shapeType = shapeButton.getId();
     }
 
-    //Event med villkorssats för klick på canvasen
+    //MouseEvent for clicking on canvas
     public void canvasClick(MouseEvent mouseEvent) {
 
-        x = mouseEvent.getX();
-        y = mouseEvent.getY();
+        double x = mouseEvent.getX();  //Getting the coordinates from the mouse click
+        double y = mouseEvent.getY();
 
-        if(mouseEvent.getButton() == MouseButton.PRIMARY)  //Om vänsterklick
+        if(mouseEvent.getButton() == MouseButton.PRIMARY)  //If the left mouse button is clicked
         {
-            if(selectedShape != null)  //Om shape blivit selectedd med höger klick och ska flyttas
+            if(selectedShape != null)  //If shape is selected the shape gets a new position
             {
-                deleteElementsAfterPointer(undoRedoPointer);
+                deleteElementsAfterPointer(undoRedoPointer);  //The method deleteElementsAfterPointer is called
 
-                command = new PositionChanger(selectedShape, x, y);
-                command.execute();
-                commandStack.push(command);
-                redrawCanvas();
-                undoRedoPointer++;
+                command = new PositionChanger(selectedShape, x, y);  //Object of PositionChanger is created and stored as Command
+                command.execute();  //The method execute is called for the positionChanger
+                commandStack.push(command);  //The command is put (pushed) in the commandStack
+                redrawCanvas();  //The method redrawCanvas is called
+                undoRedoPointer++;  //undoRedoPointer is added by one because of the new added command
 
-                selectedShape = null;
+                selectedShape = null;  //selected shape is unselected
             }
 
-            else if (shapeType != null)  //Om användaren valt en shape i fönstret
+            else if (shapeType != null)  //Else if shape type is chosen
             {
-                color = colorPicker.getValue();
-                size = Double.parseDouble(textField.getText());
+                color = colorPicker.getValue();  //Gets color from colorPicker
+                size = Double.parseDouble(textField.getText());  //Gets size from textField
 
-                shape = shapeFactory.createShape(shapeType, color, size, x, y);
+                shape = shapeFactory.createShape(shapeType, color, size, x, y);  //Shape is created
 
-                if(shape != null)  //Om shape skapats och finns
+                if(shape != null)  //If shape was successfully created
                 {
-                    deleteElementsAfterPointer(undoRedoPointer);
+                    deleteElementsAfterPointer(undoRedoPointer);  //The method deleteElementsAfterPointer is called
 
-                    command = new ShapeInserter(shapes, shape);
-                    command.execute();
-                    redrawCanvas();
-
-                    commandStack.push(command);
-                    undoRedoPointer++;
+                    command = new ShapeInserter(shapes, shape);  //Object of ShapeInserter is created and stored as Command
+                    command.execute();  //The method execute is called for the ShapeInserter
+                    commandStack.push(command);  //The command is put (pushed) in the commandStack
+                    redrawCanvas();  //The method redrawCanvas is called
+                    undoRedoPointer++;  //undoRedoPointer is added by one because of the new added command
                 }
 
-                shapeType = null;
-                shapeButton.setSelected(false);
+                shapeType = null;  //shapeType becomes null so the user cant make a new shape without choosing type
+                shapeButton.setSelected(false);  //The toggleButton shapeButton becomes unselected
             }
         }
-        else  //Annars om högerklick
+        else  //Else (right mouse button is clicked)
         {
-            for (Shape s : shapes)  //Listan över shapes loopas för att se om en shape blivit klickad på
+            for (Shape s : shapes)  //Loop that loops through the shapes list to see if one is clicked
             {
-                if(s.isClicked(mouseEvent))
+                if(s.isClicked(mouseEvent))  //If shape is clicked
                 {
-                    selectedShape = s;  //Om shape blivit vald så lagras den i selectedShape
+                    selectedShape = s;  //selectedShape is a clicked shape
                 }
             }
         }
     }
 
-    //Metoden ritar om canvasen
+    //The method redrawCanvas redraws the canvas
     private void redrawCanvas()
     {
         g.clearRect(0, 0, canvasWidth, canvasHeight);
         g.setFill(Color.WHITE);
         g.fillRect(0, 0, 600, 400);
 
-        for (Shape shape : shapes) {
+        for (Shape shape : shapes) {  //Loop for drawing all the shapes from the list shapes to the canvas
             shape.draw(g);
         }
     }
 
-    //Metoden används för att byta storlek på shape
-    public void changeSize(String newSize)
+    //The method changeSize is used for changing size on a shape
+    private void changeSize(String newSize)
     {
-        size = Double.parseDouble(newSize);
+        size = Double.parseDouble(newSize);  //Gets the size from the textField
 
-        deleteElementsAfterPointer(undoRedoPointer);
+        deleteElementsAfterPointer(undoRedoPointer);  //The method deleteElementsAfterPointer is called
 
-        command = new SizeChanger(selectedShape, size);
-
-        command.execute();
-        commandStack.push(command);
-        redrawCanvas();
-        undoRedoPointer++;
+        command = new SizeChanger(selectedShape, size); //Object of SizeChanger is created and stored as Command
+        command.execute();  //The method execute is called for the SizeChanger
+        commandStack.push(command);  //The command is put (pushed) in the commandStack
+        redrawCanvas();  //The method redrawCanvas is called
+        undoRedoPointer++;  //undoRedoPointer is added by one because of the new added command
     }
 
-    //Metoden används för att byta färg på shape
+    //The method changeColor is used for changing color on a shape
     public void changeColor() {
 
-        if(selectedShape != null)
+        if(selectedShape != null)  //If shape is selected
         {
-            color = colorPicker.getValue();
+            color = colorPicker.getValue();  //Gets the color from the colorPicker
 
-            deleteElementsAfterPointer(undoRedoPointer);
+            deleteElementsAfterPointer(undoRedoPointer);  //The method deleteElementsAfterPointer is called
 
-            command = new ColorChanger(selectedShape, color);
-            command.execute();
-
-            commandStack.push(command);
-            redrawCanvas();
-            undoRedoPointer++;
+            command = new ColorChanger(selectedShape, color);  //Object of ColorChanger is created and stored as Command
+            command.execute();  //The method execute is called for the ColorChanger
+            commandStack.push(command);  //The command is put (pushed) in the commandStack
+            redrawCanvas();  //The method redrawCanvas is called
+            undoRedoPointer++;  //undoRedoPointer is added by one because of the new added command
 
             selectedShape = null;
         }
     }
 
-    //Metoden tar bort element efter nytt kommando utförts efter man gjort en undo i commandStacken
+    //The method deleteElementsAfterPointer is used for deleting commands done after the undoRedoPointers value (element)
+    //in the commandStack when a new command is to be done
     private void deleteElementsAfterPointer(int undoRedoPointer)
     {
         if(commandStack.size()<1)
@@ -195,32 +191,33 @@ public class Controller {
         }
     }
 
-    //Metoden används när man ångrar något man gjort
+    //The method undo is used for undo executions that is done
     public void undo() {
 
-        if(undoRedoPointer >= 0)
+        if(undoRedoPointer >= 0)  //If at least one command has been made
         {
-            Command command = commandStack.get(undoRedoPointer);
-            command.unExecute();
+            Command command = commandStack.get(undoRedoPointer);  //Gets the current command
+            command.unExecute();  //The method unExecute is called for the current command
 
-            undoRedoPointer--;
+            undoRedoPointer--;  //undoRedoPointer is subtracted by one because of one command is being undone
 
-            redrawCanvas();
+            redrawCanvas();  //The method redrawCanvas is called
         }
     }
 
-    //Redo återskapar något man tagit bort
+    //The method redo restores an previous undone command
     public void redo() {
 
-        if(undoRedoPointer == commandStack.size() - 1)
+        if(undoRedoPointer == commandStack.size() - 1)  //If no command has been made
             return;
-        undoRedoPointer++;
-        Command command = commandStack.get(undoRedoPointer);
-        command.execute();
-        redrawCanvas();
+        undoRedoPointer++;  //undoRedoPointer is added by one because of the new added command
+        Command command = commandStack.get(undoRedoPointer);  //Gets the current command
+        command.execute();  //The method execute is called for the current command
+        redrawCanvas();  //The method redrawCanvas is called
     }
 
-    //saveToFile anropas när man ska spara från fönstret och anropar i sin tur metoden writeToFile
+    //The method saveToFile is called from the GUI window when clicking save (under file)
+    //The method opens a window for choosing file name and format
     public void saveToFile() {
 
         FileChooser fileChooser = new FileChooser();
@@ -236,36 +233,35 @@ public class Controller {
 
         File file = fileChooser.showSaveDialog(canvas.getScene().getWindow());
 
-        if(file != null)
+        if(file != null)  //If file creation succeeded
         {
-            writeToFile(file, shapes);
+            writeToFile(file, shapes);  //The method writeToFile is called
         }
-        else  //Om sparning blir avbruten så skrivs det ut
+        else  //Else (file creation did'nt succeed)
         {
-            redrawCanvas();  //Ritar om canvasen ifall annan utskrift skulle finnas kvar
-            canvas.getGraphicsContext2D().fillText("File not saved...", 100.0,100.0);
+            redrawCanvas();  //The method redrawCanvas is called in case of an output text may already exist
+            canvas.getGraphicsContext2D().fillText("File not saved...", 100.0,100.0);  //Prints text in canvas
         }
     }
 
-    //writeToFile utför sparandet till fil
+    //The method writeToFile are dooing the actual saving
     private void writeToFile(File file, ArrayList<Shape> shapes)
     {
-        String fileName = file.getName();
+        String fileName = file.getName();  //Gets the file-name
         String fileExtension = fileName.substring(fileName.lastIndexOf(".") + 1, file.getName().length());
 
-        FileExporter fileExporter = FileExporterFactory.createSaveFormat(fileExtension);
+        FileExporter fileExporter = FileExporterFactory.createSaveFormat(fileExtension);  //Creates the fileExporter
 
-        redrawCanvas(); //Ritar om canvasen ifall annan utskrift skulle finnas kvar
+        redrawCanvas(); //The method redrawCanvas is called in case of an output text may already exist
 
         try
         {
-
-            fileExporter.save(file, shapes, g);
-            canvas.getGraphicsContext2D().fillText("File saved...", 100.0,100.0);
+            fileExporter.save(file, shapes, g);  //The method save in the fileExporter is called for the saving
+            canvas.getGraphicsContext2D().fillText("File saved...", 100.0,100.0);  //Prints text in canvas
         }
         catch(Exception e)
         {
-            canvas.getGraphicsContext2D().fillText("File not saved...", 100.0,100.0);
+            canvas.getGraphicsContext2D().fillText("File not saved...", 100.0,100.0);  //Prints text in canvas
         }
     }
 }

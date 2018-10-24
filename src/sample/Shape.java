@@ -4,7 +4,9 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
-public class Shape implements Draw, ShapeSelect{
+//The class Shape is an abstract super-class for creating shapes
+//Shape implements Draw for drawing shapes to canvas and ShapeSelect for ability to click on shapes
+public abstract class Shape implements Draw, ShapeSelect{
 
     Color color;
     double size;
@@ -13,16 +15,13 @@ public class Shape implements Draw, ShapeSelect{
     double height;
     double width;
 
+    //Constructor of the class
     public Shape(Color color, double size, double x, double y)
     {
         this.color = color;
         this.size = size;
         this.x = x;
         this.y = y;
-    }
-
-    public Shape(Shape shape) {
-        this(shape.getColor(), shape.getSize(), shape.getX(), shape.getY());
     }
 
     @Override
@@ -61,22 +60,6 @@ public class Shape implements Draw, ShapeSelect{
 
     public void setY(double y) {
         this.y = y;
-    }
-
-    public double getHeight() {
-        return height;
-    }
-
-    public void setHeight(double height) {
-        this.height = height;
-    }
-
-    public double getWidth() {
-        return width;
-    }
-
-    public void setWidth(double width) {
-        this.width = width;
     }
 
     @Override

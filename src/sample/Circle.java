@@ -4,11 +4,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
+//The class Circle is a template to create circles
 public class Circle extends Shape{
 
+    //Constructor of the class
     public Circle(Color color, double size, double x, double y){super (color, size, x, y);
 
-        this.height = size * 0.5;
+        this.height = size * 0.5;  //The size of the cirkle is devided equally to height and width
         this.width = size * 0.5;
         this.x = x;
         this.y = y;
@@ -40,6 +42,7 @@ public class Circle extends Shape{
         this.y = y;
     }
 
+    //The method draw is used to draw objects to the canvas
     @Override
     public void draw(GraphicsContext g) {
 
@@ -47,6 +50,7 @@ public class Circle extends Shape{
         g.fillOval(x - width * 0.5, y - height * 0.5, width, height);
     }
 
+    //The method isClicked is used to check if an object is clicked (selected) by the user on the canvas
     @Override
     public boolean isClicked(MouseEvent me)
     {
@@ -56,6 +60,7 @@ public class Circle extends Shape{
         return false;
     }
 
+    //toString is used by the SvgExporter for saving to SVG format
     @Override
     public String toString() {
 

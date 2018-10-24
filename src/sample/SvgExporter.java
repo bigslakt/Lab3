@@ -7,14 +7,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+//The class SvgExporter is a template to create objects that is used for saving shapes to SVG format
+//SvgExporter implements FileExporter and uses its method save
 public class SvgExporter implements FileExporter {
 
+    //The method save is used to save shapes from the canvas to file
     @Override
     public void save(File file, ArrayList<Shape> shapesList, GraphicsContext g) {
 
         if (!file.exists()){
 
-            Thread thread = new Thread(() ->{
+            Thread thread = new Thread(() ->{  //Lambda expression for writing to file in new thread
                 try {
 
                     FileWriter writer = new FileWriter(file);

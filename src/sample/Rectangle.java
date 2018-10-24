@@ -4,11 +4,13 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 
+//The class Rectangle is a template to create rectangles
 public class Rectangle extends Shape{
 
+    //Constructor of the class
     public Rectangle(Color color, double size, double x, double y){super (color, size, x, y);
 
-        this.height = size * 0.3;
+        this.height = size * 0.3;  //The size of the rectangle is devided 0.3 to height and 0.7 to width
         this.width = size * 0.7;
         this.x = x - width * 0.5;
         this.y = y - height * 0.5;
@@ -40,6 +42,7 @@ public class Rectangle extends Shape{
         this.y = y - height * 0.5;
     }
 
+    //The method draw is used to draw objects to the canvas
     @Override
     public void draw(GraphicsContext g) {
 
@@ -47,6 +50,7 @@ public class Rectangle extends Shape{
         g.fillRect(x,y,width, height);
     }
 
+    //The method isClicked is used to check if an object is clicked (selected) by the user on the canvas
     public boolean isClicked(MouseEvent me){
 
         if((me.getX() > x && me.getX() < x + width) && (me.getY() > y && me.getY() < y + height)){
@@ -55,6 +59,7 @@ public class Rectangle extends Shape{
         return false;
     }
 
+    //toString is used by the SvgExporter for saving to SVG format
     @Override
     public String toString() {
 
