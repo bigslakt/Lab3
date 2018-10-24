@@ -1,0 +1,72 @@
+package sample;
+
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.paint.Color;
+
+public class Circle extends Shape{
+
+    public Circle(Color color, double size, double x, double y){super (color, size, x, y);
+
+        this.height = size * 0.5;
+        this.width = size * 0.5;
+        this.x = x;
+        this.y = y;
+    }
+
+    public double getSize() {
+        return size;
+    }
+
+    public void setSize(double size) {
+
+        this.height = size * 0.5;
+        this.width = size * 0.5;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    @Override
+    public void draw(GraphicsContext g) {
+
+        g.setFill(color);
+        g.fillOval(x - width * 0.5, y - height * 0.5, width, height);
+    }
+
+    @Override
+    public boolean isClicked(MouseEvent me)
+    {
+        if(Math.sqrt(Math.pow(x - me.getX(), 2) + Math.pow(y - me.getY(), 2)) < width * 0.5){
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+
+        String tmpColor = String.format("#%02X%02X%02X",
+                (int) (getColor().getRed()*255),
+                (int) (getColor().getGreen()*255),
+                (int) (getColor().getBlue()*255));
+
+        String string = "<circle cx=\"" + this.x +"\" cy=\"" + this.y + "\" " +
+                "r=\"" + this.width/2 + "\" fill=\"" + tmpColor + "\"/>";
+
+        return string;
+    }
+}
